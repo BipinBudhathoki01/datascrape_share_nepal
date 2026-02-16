@@ -1,3 +1,5 @@
+name: Nepse Data Auto Scrape
+
 on:
   push:
     branches:
@@ -5,3 +7,33 @@ on:
   schedule:
     - cron: '15 11 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Execute Script
+        run: python scrape_nepse.py
+
+      - name: Commit and Push
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "github-actions"
+          git add .
+          git commit -m "Daily auto update" || echo "No changes to commit"
+          git push
